@@ -178,16 +178,16 @@ def improvedClusterFinder(dataC, dataN, clusterC, clusterN, dc, dn, weightOfNume
         clusterLabel.append(similarity.index(np.max(similarity)))
     return clusterLabel   
 
-def improvedIterativeFunc(dataC, dataN, clusterC, clusterN, iteramax, dc):#do the iterative work input:data and cluster,iterative max times output:the clusterlabel and the clusterArray
+def improvedIterativeFunc(dataC, dataN, clusterC, clusterN, iteramax, dc, h):#do the iterative work input:data and cluster,iterative max times output:the clusterlabel and the clusterArray
     dn = 1-dc
     clusterLabel = []
     clusterLabelOld = []
     clusterCNew = copy.deepcopy(clusterC)
     clusterNNew = copy.deepcopy(clusterN)
-    weightOfNumerical = weightNumerical(12,dataN,clusterLabel,clusterN.shape[0])
+    weightOfNumerical = weightNumerical(h,dataN,clusterLabel,clusterN.shape[0])
     for i in range(iteramax):
         clusterLabel = improvedClusterFinder(dataC, dataN, clusterCNew, clusterNNew, dc, dn, weightOfNumerical)
-        weightOfNumerical = weightNumerical(12,dataN,clusterLabel,clusterN.shape[0])
+        weightOfNumerical = weightNumerical(h,dataN,clusterLabel,clusterN.shape[0])
         if clusterLabel == clusterLabelOld:
             #print("final iterative times: ",i)
             break
@@ -207,16 +207,16 @@ def weightOverallNumerical(h,dataN,numberOfCluster):
     return weightOfNumerical
 
 
-def improvedMEIterativeFunc(dataC, dataN, clusterC, clusterN, iteramax, dc):#do the iterative work input:data and cluster,iterative max times output:the clusterlabel and the clusterArray
+def improvedMEIterativeFunc(dataC, dataN, clusterC, clusterN, iteramax, dc, h):#do the iterative work input:data and cluster,iterative max times output:the clusterlabel and the clusterArray
     dn = 1-dc
     clusterLabel = []
     clusterLabelOld = []
     clusterCNew = copy.deepcopy(clusterC)
     clusterNNew = copy.deepcopy(clusterN)
-    weightOfNumerical = weightOverallNumerical(12,dataN,clusterN.shape[0])
+    weightOfNumerical = weightOverallNumerical(h,dataN,clusterN.shape[0])
     for i in range(iteramax):
         clusterLabel = improvedClusterFinder(dataC, dataN, clusterCNew, clusterNNew, dc, dn, weightOfNumerical)
-        #weightOfNumerical = weightNumerical(12,dataN,clusterLabel,clusterN.shape[0]) 
+        #weightOfNumerical = weightNumerical(h,dataN,clusterLabel,clusterN.shape[0]) 
         if clusterLabel == clusterLabelOld:
             #print("final iterative times: ",i)
             break
@@ -229,7 +229,7 @@ def improvedMEIterativeFunc(dataC, dataN, clusterC, clusterN, iteramax, dc):#do 
 
 #def improvedClusterFinder(dataC):
 
-def accuracyFigure(dataC, dataN, clusterC, clusterN, iteramax, start, stop, step, targetLabel):#draw the accuracy figure by modifing the dc, using the step between start and stop
+def accuracyFigure(dataC, dataN, clusterC, clusterN, iteramax, start, stop, step, targetLabel, h):#draw the accuracy figure by modifing the dc, using the step between start and stop
     accuracyRate = []
     improvedAccuracyRate = []
     improvedMEAccuracyRate = []
@@ -253,7 +253,7 @@ def accuracyFigure(dataC, dataN, clusterC, clusterN, iteramax, start, stop, step
         accuracyRate.append(sumnumber/len(targetLabel))
     #print(accuracyRate)
     for i in range(len(weightList)):
-        improvedClusterCNew, improvedClusterNNew, improvedClusterlabel = improvedIterativeFunc(dataC, dataN, clusterC, clusterN, iteramax, weightList[i])
+        improvedClusterCNew, improvedClusterNNew, improvedClusterlabel = improvedIterativeFunc(dataC, dataN, clusterC, clusterN, iteramax, weightList[i], h)
         #print(clusterlabel == targetLabel
         sumnumber = 0
         for j in range(len(improvedClusterlabel)):
@@ -262,7 +262,7 @@ def accuracyFigure(dataC, dataN, clusterC, clusterN, iteramax, start, stop, step
         improvedAccuracyRate.append(sumnumber/len(targetLabel))
     #print(accuracyRate)
     for i in range(len(weightList)):
-        improvedMEClusterCNew, improvedMEClusterNNew, improvedMEClusterlabel = improvedMEIterativeFunc(dataC, dataN, clusterC, clusterN, iteramax, weightList[i])
+        improvedMEClusterCNew, improvedMEClusterNNew, improvedMEClusterlabel = improvedMEIterativeFunc(dataC, dataN, clusterC, clusterN, iteramax, weightList[i], h)
         #print(clusterlabel == targetLabel
         sumnumber = 0
         for j in range(len(improvedMEClusterlabel)):
@@ -317,6 +317,47 @@ def scatterShow(dataC, dataN, clusterC, clusterN, iteramax, dc, targetLabel, xco
     plt.show()
     return 
     
+def barFigure(dataC, dataN, clusterC, clusterN, iteramax, targetLabel, dc, h, sign):
+    accuracyRate = []
+    clusterLabel = []
+    clusterCN = copy.deepcopy(clusterC)
+    clusterNN = copy.deepcopy(clusterN)
+    clusterCN, clusterNN, clusterLabel = iterativeFunc(dataC, dataN, clusterC, clusterN, iteramax, dc)
+    sumnumber = 0
+    for j in range(len(clusterLabel)):
+        if clusterLabel[j] == targetLabel[j]:
+            sumnumber = sumnumber+1
+    accuracyRate.append(sumnumber/len(clusterLabel))
+    clusterCN, clusterNN, clusterLabel = improvedIterativeFunc(dataC, dataN, clusterC, clusterN, iteramax, dc, h)
+    sumnumber = 0
+    for j in range(len(clusterLabel)):
+        if clusterLabel[j] == targetLabel[j]:
+            sumnumber = sumnumber+1
+    accuracyRate.append(sumnumber/len(clusterLabel))
+    clusterCN, clusterNN, clusterLabel = improvedMEIterativeFunc(dataC, dataN, clusterC, clusterN, iteramax, dc, h)
+    sumnumber = 0
+    for j in range(len(clusterLabel)):
+        if clusterLabel[j] == targetLabel[j]:
+            sumnumber = sumnumber+1
+    accuracyRate.append(sumnumber/len(clusterLabel))
+    fig, ax1 = plt.subplots(figsize = (6,4))  
+    if sign == 2:
+
+        print("The errors of origin algorithm is %f, the improved is %f" %(1-accuracyRate[0], 1-accuracyRate[1]))
+    else:
+        print("The errors of origin algorithm is %f, the improved is %f, the my method is %f" %(1-accuracyRate[0], 1-accuracyRate[1], 1-accuracyRate[2]))
+    xList = np.arange(0,sign,1).tolist()
+    colors = ['lightblue','orange','grey']
+    ax1.set(title = "The accuracy of the original OCIL and Improved OCIL")
+    for i in range(sign):
+        ax1.bar(xList[i], accuracyRate[i], align='center', width = 0.2, fc = colors[i])
+    if sign == 2:
+        ax1.set(xticks = xList, xticklabels = ['Origin','Improved'])
+    else:
+        ax1.set(xticks = xList, xticklabels = ['Origin', 'Improved', 'ME'])
+    plt.show()
+    return
+
 
 
 
